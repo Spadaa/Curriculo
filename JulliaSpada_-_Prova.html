@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculadora</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            outline: 0;
+            padding: 0;
+        }
+
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+
+        #container {
+            display: flex;
+            align-items: center;
+        }
+
+        #ligarDesligar {
+            cursor: pointer;
+            text-align: center;
+            border: 1px solid black;
+            padding: 10px;
+            border-radius: 5px;
+            background-color: lightblue;
+            margin-right: 20px;
+        }
+
+        #calculadora {
+            width: 25%; 
+            height: 70%; 
+            border: 1px solid black;
+            margin: 0 5%;
+            padding: 2%;
+            font-family: Arial, sans-serif;
+            border-radius: 5px;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.15);
+        }
+
+        #visor {
+            width: 90%; 
+            height: 10%; 
+            border: 1px solid gray;
+            margin: 2% 5%;
+            padding: 1%;
+            font-size: 2vw;
+            text-align: right;
+            border-radius: 5px;
+            background-color: black;
+            color: green;
+        }
+
+        #historico {
+            width: 400px;
+            height: 700px;
+            background-color: rgb(228, 228, 228);
+            border: 1px solid black;
+            margin: 0 20px;
+            padding: 10px;
+            font-family: Arial, sans-serif;
+            border-radius: 5px;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.15);
+        }
+
+        .teclas {
+            border-radius: 5px;
+            width: 20%;
+            height: 10%; 
+            border: 1px solid gray;
+            margin: 1%;
+            padding: 1%;
+            font-size: 2vw;
+            text-align: center;
+            cursor: pointer;
+            display: inline-block;
+        }
+
+        .teclas2 {
+            border-radius: 5px;
+            width: 25%;
+            height: 20%;
+            border: 1px solid gray;
+            margin: 8px;
+            padding: 10px;
+            font-size: 24px;
+            text-align: center;
+            cursor: pointer;
+            display: inline-block;
+            background-color: black;
+            color: white;
+        }
+
+        #teclas3,
+        #teclas4,
+        #limpar {
+            border-radius: 5px;
+            width: 100%;
+            height: 45px;
+            border: 1px solid gray;
+            padding: 10px;
+            font-size: 20px;
+            text-align: center;
+            cursor: pointer;
+            display: inline-block;
+            background-color: black;
+            color: white;
+        }
+
+        .texto {
+            text-align: center;
+            font-size: 20px;
+        }
+
+        #limpar:hover {
+            background-color: lightgray;
+        }
+        
+        #nomes {
+            width: 380px;
+            height: 60px;
+            border: 1px solid gray;
+            margin: 10px;
+            padding: 5px;
+            font-size: 22px;
+            text-align: center;
+            border-radius: 5px;
+            background-color: white;
+            color: black;
+        }
+
+    </style>
+</head>
+
+<body>
+    <div id="calculadora">
+        <div id="visor">0</div>
+        <br>
+        <div>
+            <div class="teclas" onclick="limpaVisor()">C</div>
+            <div class="teclas" onclick="guardarMem()">M+</div>
+            <div class="teclas" onclick="recuMem()">MR</div>
+            <div class="teclas" onclick="apagarMem()">MC</div>
+        </div>
+
+        <div>
+            <div class="teclas" onclick="addDigito(7)">7</div>
+            <div class="teclas" onclick="addDigito(8)">8</div>
+            <div class="teclas" onclick="addDigito(9)">9</div>
+            <div class="teclas2" onclick="defOperacao('*')">*</div>
+        </div>
+
+        <div>
+            <div class="teclas" onclick="addDigito(4)">4</div>
+            <div class="teclas" onclick="addDigito(5)">5</div>
+            <div class="teclas" onclick="addDigito(6)">6</div>
+            <div class="teclas2" onclick="defOperacao('/')">/</div>
+        </div>
+
+        <div>
+            <div class="teclas" onclick="addDigito(1)">1</div>
+            <div class="teclas" onclick="addDigito(2)">2</div>
+            <div class="teclas" onclick="addDigito(3)">3</div>
+            <div class="teclas2" onclick="defOperacao('+')">+</div>
+        </div>
+
+        <div>
+            <div class="teclas" onclick="resul()">=</div>
+            <div class="teclas" onclick="addDigito(0)">0</div>
+            <div class="teclas" onclick="addDecimal()">.</div>
+            <div class="teclas2" onclick="defOperacao('-')">-</div>
+        </div>
+
+        <div>
+            <div id="teclas4" onclick="mudarCor()">Alterar Cor</div>
+        </div>
+
+        <div>
+            <div id="teclas3" onclick="mostrarNomes()">Mostrar Nomes</div>
+        </div>  
+
+        <div id="nomes"></div>
+    </div>
+
+    <div id="historico">
+        <div class="texto">Histórico de Operações</div>
+        <hr>
+        <div id="limpar" onclick="limparHistorico()">Limpar</div>
+        <div id="operacoes"></div>
+    </div>
+
+    <div id="ligarDesligar" onclick="ligarDesligarCalculadora()">Ligar / Desligar</div>
+
+    <script>
+        var calculadoraLigada = true;
+        var valorVisor = "0";
+        var primeiroValor = null;
+        var segundoValor = null;
+        var operacao = null;
+        var nome = "";
+        var nomes = "Mostrar Nomes";
+        var color = "0";
+        var resultado = null;
+        var memoria = null;
+        var historico = []; 
+
+
+        function ligarDesligarCalculadora() {
+            calculadoraLigada = !calculadoraLigada;
+
+            if (calculadoraLigada) {
+                valorVisor = "0";
+                color = "0";
+                atualizaVisor();
+                enableTeclas();
+            } else {
+                valorVisor = "";
+                color = "5";
+                atualizaVisor();
+                disableTeclas();
+            }
+        }
+
+        function disableTeclas() {
+            var teclas = document.getElementsByClassName('teclas');
+            for (var i = 0; i < teclas.length; i++) {
+                teclas[i].style.pointerEvents = 'none';
+                teclas[i].style.backgroundColor = 'lightgray';
+            }
+        }
+
+        function enableTeclas() {
+            var teclas = document.getElementsByClassName('teclas');
+            for (var i = 0; i < teclas.length; i++) {
+                teclas[i].style.pointerEvents = 'auto';
+                teclas[i].style.backgroundColor = '';
+            }
+        }
+
+        function guardarMem() {
+            memoria = resultado;
+        }
+
+        function recuMem() {
+            valorVisor = memoria;
+        }
+
+        function apagarMem() {
+            memoria = null;
+        }
+
+        function mudarCor() {
+            if (color === "0") {
+                visor.style.color = 'red';
+                visor.style.background = 'blue';
+                color = "1";
+            }
+            else if (color === "1") {
+                visor.style.color = 'pink';
+                visor.style.background = 'green';
+                color = "2";
+            }
+            else if (color === "2") {
+                visor.style.color = 'purple';
+                visor.style.background = 'white';
+                color = "3";
+            }
+            else if (color === "3") {
+                visor.style.color = 'pink';
+                visor.style.background = 'red';
+                color = "4";
+            }
+            else if (color === "4"){
+                visor.style.color = 'green';
+                visor.style.background = 'black';
+                color = "0";
+            }
+        }
+
+        function mostrarNomes() {
+            if (nome === "") {
+                nomes = "Ocultar Nomes";
+                nome = "Júllia Santos e João Pedro Spadacini";
+                document.getElementById("nomes").innerText = nome;
+                document.getElementById("teclas3").innerText = nomes;
+            } else {
+                nome = "";
+                nomes = "Mostrar Nomes"
+                document.getElementById("nomes").innerText = nome;
+                document.getElementById("teclas3").innerText = nomes;
+            }
+        }
+
+        function limpaVisor() {
+            valorVisor = "0";
+            primeiroValor = null;
+            segundoValor = null;
+            operacao = null;
+            atualizaVisor();
+        }
+
+        function addDigito(digit) {
+            if (valorVisor === "0") {
+                valorVisor = digit.toString();
+            } else {
+                valorVisor += digit.toString();
+            }
+            atualizaVisor();
+        }
+
+        function addDecimal() {
+            if (!valorVisor.includes(".")) {
+                valorVisor += ".";
+            }
+            atualizaVisor();
+        }
+
+        function addHistorico(operacao) {
+            historico.push(operacao);
+            attHistorico();
+        }
+
+        function attHistorico() {
+            var historicoDiv = document.getElementById("operacoes");
+            historicoDiv.innerHTML = historico.join("<br>");
+        }
+
+        function defOperacao(op) {
+            if (operacao !== null) {
+
+                segundoValor = parseFloat(valorVisor);
+
+                var operacaoTexto = `${primeiroValor} ${operacao} ${segundoValor} = ${valorVisor}`;
+                addHistorico(operacaoTexto);
+
+                resul();
+            }
+
+            primeiroValor = parseFloat(valorVisor);
+            operacao = op;
+            valorVisor = "0";
+            atualizaVisor();
+        }
+
+        function resul() {
+            if (operacao === null) {
+                return;
+            }
+
+            segundoValor = parseFloat(valorVisor);
+
+            switch (operacao) {
+                case "+":
+                    resultado = soma(primeiroValor, segundoValor);
+                    break;
+                case "-":
+                    resultado = subtracao(primeiroValor, segundoValor);
+                    break;
+                case "*":
+                    resultado = multiplicacao(primeiroValor, segundoValor);
+                    break;
+                case "/":
+                    resultado = divisao(primeiroValor, segundoValor);
+                    break;
+            }
+
+            var operacaoTexto = `${primeiroValor} ${operacao} ${segundoValor} = ${resultado}`;
+            addHistorico(operacaoTexto);
+
+            operacao = null;
+            primeiroValor = null;
+            segundoValor = null;
+            valorVisor = resultado; 
+            atualizaVisor();
+        }
+
+        function limparHistorico() {
+            historico = [];
+            attHistorico();
+        }
+
+        function atualizaVisor() {
+            document.getElementById("visor").innerText = valorVisor;
+        }
+
+        function soma(valor1, valor2) {
+            resultado = valor1 + valor2;
+            return (resultado).toString();
+        }
+        function subtracao(valor1, valor2) {
+            resultado = valor1 - valor2;
+            return (resultado).toString();
+        }
+        function multiplicacao(valor1, valor2) {
+            resultado = valor1 * valor2;
+            return (resultado).toString();
+        }
+        function divisao(valor1, valor2) {
+            resultado = valor1 / valor2;
+            return (resultado).toString();
+        }
+    </script>
+</body>
+
+</html>
